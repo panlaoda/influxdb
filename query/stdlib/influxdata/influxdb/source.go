@@ -45,7 +45,9 @@ type Source struct {
 func (s *Source) Run(ctx context.Context) {
 	labelValues := s.m.getLabelValues(ctx, s.orgID, s.op)
 	start := time.Now()
-	err := s.runner.run(ctx)
+	span, ctxWithSpan := tracing.StartSpanFromContextWithOperationName(ctx, "source-"+s.op)
+	err := s.runner.run(ctxWithSpan)
+	span.Finish()
 	s.m.recordMetrics(labelValues, start)
 	for _, t := range s.ts {
 		t.Finish(s.id, err)
