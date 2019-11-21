@@ -5,7 +5,13 @@ import {get} from 'lodash'
 
 // Components
 import MatchingRuleCard from 'src/alerting/components/builder/MatchingRuleCard'
-import {SpinnerContainer, TechnoSpinner} from '@influxdata/clockface'
+import {
+  SpinnerContainer,
+  TechnoSpinner,
+  FlexBox,
+  FlexDirection,
+  AlignItems,
+} from '@influxdata/clockface'
 
 // Actions
 import {getActiveTimeMachine} from 'src/timeMachine/selectors'
@@ -16,6 +22,7 @@ import * as api from 'src/client'
 //Types
 import {NotificationRule, Check, AppState, CheckTagSet} from 'src/types'
 import {EmptyState, ComponentSize, RemoteDataState} from '@influxdata/clockface'
+import BuilderCard from 'src/timeMachine/components/builderCard/BuilderCard'
 
 interface StateProps {
   check: Partial<Check>
@@ -27,8 +34,10 @@ const CheckMatchingRulesCard: FunctionComponent<StateProps> = ({
   orgID,
 }) => {
   const getMatchingRules = async (): Promise<NotificationRule[]> => {
-    const tags: CheckTagSet[] = get(check, 'tags', [])
-    const tagsList = tags.map(t => ['tag', `${t.key}:${t.value}`])
+    const tags: CheckTagSet[] = get(check, 'tags', []) || []
+    const tagsList = tags
+      .filter(t => t.key && t.value)
+      .map(t => ['tag', `${t.key}:${t.value}`])
 
     // todo also: get tags from query results
 
@@ -38,6 +47,7 @@ const CheckMatchingRulesCard: FunctionComponent<StateProps> = ({
 
     if (resp.status !== 200) {
       setMatchingRules({matchingRules: [], status: RemoteDataState.Error})
+      //TODO:notify?
       return
     }
 
@@ -60,40 +70,57 @@ const CheckMatchingRulesCard: FunctionComponent<StateProps> = ({
     getMatchingRules()
   }, [check.tags])
 
-  const emptyState = (
-    <EmptyState
-      size={ComponentSize.Small}
-      className="alert-builder--card__empty"
-    >
-      <EmptyState.Text>
-        Notification Rules configured to act on tag sets matching this Alert
-        Check will automatically show up here
-      </EmptyState.Text>
-      <EmptyState.Text>
-        Looks like no notification rules match the tag set defined in this Alert
-        Check
-      </EmptyState.Text>
-    </EmptyState>
-  )
+  let contents: JSX.Element
 
   if (
     status === RemoteDataState.NotStarted ||
     status === RemoteDataState.Loading
   ) {
-    return (
+    contents = (
       <SpinnerContainer spinnerComponent={<TechnoSpinner />} loading={status} />
+    )
+  } else if (matchingRules.length === 0) {
+    contents = (
+      <EmptyState
+        size={ComponentSize.Small}
+        className="alert-builder--card__empty"
+      >
+        <EmptyState.Text>
+          Notification Rules configured to act on tag sets matching this Alert
+          Check will show up here
+        </EmptyState.Text>
+        <EmptyState.Text>
+          Looks like no notification rules match the tag set defined in this
+          Alert Check
+        </EmptyState.Text>
+      </EmptyState>
+    )
+  } else {
+    contents = (
+      <>
+        {matchingRules.map(r => (
+          <MatchingRuleCard key={r.id} rule={r} />
+        ))}
+      </>
     )
   }
 
-  if (matchingRules.length === 0) {
-    return emptyState
-  }
   return (
-    <>
-      {matchingRules.map(r => (
-        <MatchingRuleCard key={r.id} rule={r} />
-      ))}
-    </>
+    <BuilderCard
+      testID="builder-conditions"
+      className="alert-builder--card alert-builder--conditions-card"
+    >
+      <BuilderCard.Header title="Matching Notification Rules" />
+      <BuilderCard.Body addPadding={true} autoHideScrollbars={true}>
+        <FlexBox
+          direction={FlexDirection.Column}
+          alignItems={AlignItems.Stretch}
+          margin={ComponentSize.Medium}
+        >
+          {contents}
+        </FlexBox>
+      </BuilderCard.Body>
+    </BuilderCard>
   )
 }
 
