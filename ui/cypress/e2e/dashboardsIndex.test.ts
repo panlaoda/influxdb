@@ -177,11 +177,9 @@ describe('Dashboards', () => {
           cy.createLabel(labelName, id).then(() => {
             cy.getByTestID(`inline-labels--add`)
               .first()
-              .click()
+              .trigger('mouseover')
 
-            cy.getByTestID('inline-labels--popover').within(() => {
-              cy.getByTestID(`label--pill ${labelName}`).click()
-            })
+            cy.getByTestID(`label--pill ${labelName}`).click()
 
             cy.getByTestID('dashboard-card')
               .first()
@@ -196,12 +194,10 @@ describe('Dashboards', () => {
         const label = 'plerps'
         cy.getByTestID(`inline-labels--add`)
           .first()
-          .click()
+          .trigger('mouseover')
 
-        cy.getByTestID('inline-labels--popover').within(() => {
-          cy.getByTestID('inline-labels--popover-field').type(label)
-          cy.getByTestID('inline-labels--create-new').click()
-        })
+        cy.getByTestID('inline-labels--popover-field').type(label)
+        cy.getByTestID('inline-labels--create-new').click()
 
         cy.getByTestID('overlay--container').within(() => {
           cy.getByTestID('create-label-form--name').should('have.value', label)
