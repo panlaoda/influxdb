@@ -351,7 +351,7 @@ func (s *Service) resourceCloneToResource(ctx context.Context, r ResourceToClone
 			}
 			cellViews = append(cellViews, cellView{c: *cell, v: *v})
 		}
-		newResource = dashboardToResource(*dash, cellViews, r.Name)
+		newResource = DashboardToResource(*dash, cellViews, r.Name)
 	case r.Kind.is(KindLabel):
 		l, err := s.labelSVC.FindLabelByID(ctx, r.ID)
 		if err != nil {

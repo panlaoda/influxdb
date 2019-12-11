@@ -68,6 +68,13 @@ func bucketToResource(bkt influxdb.Bucket, name string) Resource {
 	return r
 }
 
+func ConvertToCellView(c influxdb.Cell, v influxdb.View) cellView {
+	return cellView{
+		c: c,
+		v: v,
+	}
+}
+
 type cellView struct {
 	c influxdb.Cell
 	v influxdb.View
@@ -270,7 +277,7 @@ func convertQueries(iQueries []influxdb.DashboardQuery) queries {
 	return out
 }
 
-func dashboardToResource(dash influxdb.Dashboard, cellViews []cellView, name string) Resource {
+func DashboardToResource(dash influxdb.Dashboard, cellViews []cellView, name string) Resource {
 	if name == "" {
 		name = dash.Name
 	}
