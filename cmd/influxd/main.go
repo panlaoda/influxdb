@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/influxdata/flux"
 	"github.com/influxdata/influxdb"
 	"github.com/influxdata/influxdb/cmd/influxd/generate"
 	"github.com/influxdata/influxdb/cmd/influxd/inspect"
@@ -37,6 +38,11 @@ func init() {
 	rootCmd.AddCommand(launcher.NewCommand())
 	rootCmd.AddCommand(generate.Command)
 	rootCmd.AddCommand(inspect.NewCommand())
+
+	// TODO: this should be removed in the future: https://github.com/influxdata/influxdb/issues/16220
+	if os.Getenv("QUERY_TRACING") == "1" {
+		flux.EnableExperimentalTracing()
+	}
 }
 
 // find determines the default behavior when running influxd.
