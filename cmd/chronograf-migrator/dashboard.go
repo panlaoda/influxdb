@@ -39,11 +39,51 @@ func Convert1To2Dashboard(d1 *chronograf.Dashboard) (pkger.Resource, error) {
 				Geom:       "line",
 				ViewColors: convertColors(cell.CellColors),
 				Note:       cell.Note,
+				Position:   "overlaid",
 			}
 		case "line-stacked":
+			v.Properties = influxdb.XYViewProperties{
+				Queries:    convertQueries(cell.Queries),
+				Axes:       convertAxes(cell.Axes),
+				Type:       "xy",
+				Legend:     convertLegend(cell.Legend),
+				Geom:       "line", // TODO(desa): maybe this needs to be stacked?
+				ViewColors: convertColors(cell.CellColors),
+				Note:       cell.Note,
+				Position:   "stacked",
+			}
 		case "line-stepplot":
+			v.Properties = influxdb.XYViewProperties{
+				Queries:    convertQueries(cell.Queries),
+				Axes:       convertAxes(cell.Axes),
+				Type:       "xy",
+				Legend:     convertLegend(cell.Legend),
+				Geom:       "step",
+				ViewColors: convertColors(cell.CellColors),
+				Note:       cell.Note,
+				Position:   "overlaid",
+			}
 		case "bar":
+			v.Properties = influxdb.XYViewProperties{
+				Queries:    convertQueries(cell.Queries),
+				Axes:       convertAxes(cell.Axes),
+				Type:       "xy",
+				Legend:     convertLegend(cell.Legend),
+				Geom:       "bar",
+				ViewColors: convertColors(cell.CellColors),
+				Note:       cell.Note,
+				Position:   "overlaid",
+			}
 		case "line-plus-single-stat":
+			v.Properties = influxdb.LinePlusSingleStatProperties{
+				Queries:    convertQueries(cell.Queries),
+				Axes:       convertAxes(cell.Axes),
+				Legend:     convertLegend(cell.Legend),
+				Geom:       "bar",
+				ViewColors: convertColors(cell.CellColors),
+				Note:       cell.Note,
+				Position:   "overlaid",
+			}
 		case "single-stat":
 		case "gauge":
 		case "table":
@@ -59,7 +99,7 @@ func Convert1To2Dashboard(d1 *chronograf.Dashboard) (pkger.Resource, error) {
 	}
 
 	// TODO(desa): pass in cvs
-	return pkger.DashboardToResource(*d2, nil, d1.Name), nil
+	return pkger.DashboardToResource(*d2, cvs, d1.Name), nil
 }
 
 func convertAxes(a map[string]chronograf.Axis) map[string]influxdb.Axis {
