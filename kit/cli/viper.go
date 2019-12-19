@@ -11,10 +11,11 @@ import (
 
 // Opt is a single command-line option
 type Opt struct {
-	DestP   interface{} // pointer to the destination
-	Flag    string
-	Default interface{}
-	Desc    string
+	DestP      interface{} // pointer to the destination
+	Flag       string
+	Default    interface{}
+	Desc       string
+	Persistent bool // setting Persistent to true makes the flag persistent
 }
 
 // NewOpt creates a new command line option.
@@ -66,13 +67,17 @@ func NewCommand(p *Program) *cobra.Command {
 // registers those options with viper.
 func BindOptions(cmd *cobra.Command, opts []Opt) {
 	for _, o := range opts {
+		flagset := cmd.Flags()
+		if o.Persistent {
+			flagset = cmd.PersistentFlags()
+		}
 		switch destP := o.DestP.(type) {
 		case *string:
 			var d string
 			if o.Default != nil {
 				d = o.Default.(string)
 			}
-			cmd.Flags().StringVar(destP, o.Flag, d, o.Desc)
+			flagset.StringVar(destP, o.Flag, d, o.Desc)
 			mustBindPFlag(o.Flag, cmd)
 			*destP = viper.GetString(o.Flag)
 		case *int:
@@ -80,7 +85,7 @@ func BindOptions(cmd *cobra.Command, opts []Opt) {
 			if o.Default != nil {
 				d = o.Default.(int)
 			}
-			cmd.Flags().IntVar(destP, o.Flag, d, o.Desc)
+			flagset.IntVar(destP, o.Flag, d, o.Desc)
 			mustBindPFlag(o.Flag, cmd)
 			*destP = viper.GetInt(o.Flag)
 		case *bool:
@@ -88,7 +93,7 @@ func BindOptions(cmd *cobra.Command, opts []Opt) {
 			if o.Default != nil {
 				d = o.Default.(bool)
 			}
-			cmd.Flags().BoolVar(destP, o.Flag, d, o.Desc)
+			flagset.BoolVar(destP, o.Flag, d, o.Desc)
 			mustBindPFlag(o.Flag, cmd)
 			*destP = viper.GetBool(o.Flag)
 		case *time.Duration:
@@ -96,7 +101,7 @@ func BindOptions(cmd *cobra.Command, opts []Opt) {
 			if o.Default != nil {
 				d = o.Default.(time.Duration)
 			}
-			cmd.Flags().DurationVar(destP, o.Flag, d, o.Desc)
+			flagset.DurationVar(destP, o.Flag, d, o.Desc)
 			mustBindPFlag(o.Flag, cmd)
 			*destP = viper.GetDuration(o.Flag)
 		case *[]string:
@@ -104,7 +109,7 @@ func BindOptions(cmd *cobra.Command, opts []Opt) {
 			if o.Default != nil {
 				d = o.Default.([]string)
 			}
-			cmd.Flags().StringSliceVar(destP, o.Flag, d, o.Desc)
+			flagset.StringSliceVar(destP, o.Flag, d, o.Desc)
 			mustBindPFlag(o.Flag, cmd)
 			*destP = viper.GetStringSlice(o.Flag)
 		default:
