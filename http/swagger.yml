@@ -5580,7 +5580,7 @@ paths:
             type: string
         - in: query
           name: tag
-          description: Only show notification rules that match a tag pair. Uses `AND` to specify multiple tags.
+          description: Only show notification rules that would not filter out a measurement with the tag key value pairs provided.
           schema:
             type: string
             pattern: ^[a-zA-Z0-9_]+:[a-zA-Z0-9_]+$

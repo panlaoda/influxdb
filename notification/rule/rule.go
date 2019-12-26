@@ -335,15 +335,21 @@ func (b *Base) ClearPrivateData() {
 	b.TaskID = 0
 }
 
-// HasTag returns true if the Rule has a matching tagRule
-func (b *Base) HasTag(key, value string) bool {
+// MatchesTag returns true if the Rule matches tag key and value
+func (b *Base) MatchesTag(key, value string) bool {
 	for _, tr := range b.TagRules {
-		if tr.Operator == influxdb.Equal && tr.Key == key && tr.Value == value {
-			return true
+		if tr.Key == key {
+			if tr.Operator == influxdb.Equal && tr.Value == value {
+				return true
+			}
+			if tr.Operator == influxdb.NotEqual && tr.Value != value {
+				return true
+			}
+			return false
 		}
 	}
 
-	return false
+	return true
 }
 
 // GetOwnerID returns the owner id.

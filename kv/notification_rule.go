@@ -441,7 +441,7 @@ func filterNotificationRulesFn(
 	if filter.OrgID != nil {
 		return func(nr influxdb.NotificationRule) bool {
 			for _, ft := range filter.Tags {
-				if !nr.HasTag(ft.Key, ft.Value) {
+				if !nr.MatchesTag(ft.Key, ft.Value) {
 					return false
 				}
 			}
@@ -453,7 +453,7 @@ func filterNotificationRulesFn(
 
 	return func(nr influxdb.NotificationRule) bool {
 		for _, ft := range filter.Tags {
-			if !nr.HasTag(ft.Key, ft.Value) {
+			if !nr.MatchesTag(ft.Key, ft.Value) {
 				return false
 			}
 		}
