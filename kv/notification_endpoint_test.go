@@ -12,38 +12,7 @@ import (
 )
 
 func TestNotificationEndpointService(t *testing.T) {
-	tests := []struct {
-		name string
-		fn   func(f influxdbtesting.NotificationEndpointFields, t *testing.T) (influxdb.NotificationEndpointService, influxdb.SecretService, func())
-	}{
-		{
-			name: "bolt",
-			fn:   initBoltNotificationEndpointService,
-		},
-		{
-			name: "inmem",
-			fn:   initInmemNotificationEndpointService,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			influxdbtesting.NotificationEndpointService(tt.fn, t)
-		})
-	}
-}
-
-func initBoltNotificationEndpointService(f influxdbtesting.NotificationEndpointFields, t *testing.T) (influxdb.NotificationEndpointService, influxdb.SecretService, func()) {
-	store, closeBolt, err := NewTestBoltStore(t)
-	if err != nil {
-		t.Fatalf("failed to create new kv store: %v", err)
-	}
-
-	svc, secretSVC, closeSvc := initNotificationEndpointService(store, f, t)
-	return svc, secretSVC, func() {
-		closeSvc()
-		closeBolt()
-	}
+	influxdbtesting.NotificationEndpointService(initInmemNotificationEndpointService, t)
 }
 
 func initInmemNotificationEndpointService(f influxdbtesting.NotificationEndpointFields, t *testing.T) (influxdb.NotificationEndpointService, influxdb.SecretService, func()) {
